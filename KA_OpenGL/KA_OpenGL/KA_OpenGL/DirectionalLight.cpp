@@ -1,0 +1,38 @@
+#include "DirectionalLight.h"
+
+DirectionalLight::DirectionalLight() : Light()
+{
+	direction = glm::vec3(0.0f, -1.0f, 0.0f);
+	lightProj = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 20.0f);
+}
+
+DirectionalLight::DirectionalLight(GLuint shadowWidth, GLuint shadowHeight,
+	GLfloat red, GLfloat green, GLfloat blue,
+	GLfloat aIntensity, GLfloat dIntensity,
+	GLfloat xDir, GLfloat yDir, GLfloat zDir) : Light(shadowWidth, shadowHeight, red,green,blue,aIntensity,dIntensity)
+{
+	direction = glm::vec3(xDir, yDir, zDir);
+	lightProj = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.1f, 100.0f);
+}
+
+void DirectionalLight::UseLight(GLfloat ambientIntensityLocation, GLfloat ambientColorLocation,
+	GLfloat diffuseIntensityLocation, GLfloat directionLocation)
+{
+	// Set an color uniform in the shader composed of the color component
+	glUniform3f(ambientColorLocation, color.x, color.y, color.z);
+	glUniform1f(ambientIntensityLocation, ambientIntensity);
+
+	// Attach direction and diffuse info to uniforms
+	glUniform3f(directionLocation, direction.x, direction.y, direction.z);
+	glUniform1f(diffuseIntensityLocation, diffuseIntensity);
+}
+
+glm::mat4 DirectionalLight::CalculateLightTransform()
+{
+	// CHECK : to make a directionalLight, you have to multiply the lookAt with an Ortho matrix
+	return lightProj * glm::lookAt(-direction, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
+DirectionalLight::~DirectionalLight()
+{
+}
